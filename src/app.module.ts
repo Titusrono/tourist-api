@@ -4,9 +4,10 @@ import { AppService } from './app.service';
 import { FirebaseModule } from './modules/firebase/firebase.module';
 import * as admin from 'firebase-admin';
 import { firebaseConfig, serviceAccount } from './shared/config/firebase-config';
+import { FeedbackModule } from './modules/feedback/feedback.module';
 
 @Module({
-  imports: [FirebaseModule],
+  imports: [FirebaseModule, FeedbackModule],
   controllers: [AppController],
   providers: [
     AppService,

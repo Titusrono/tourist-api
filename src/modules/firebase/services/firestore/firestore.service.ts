@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { firebaseConfig, serviceAccount } from 'src/shared/config/firebase-config';
+import { v4 } from 'uuid';
 
 @Injectable()
 export class FirestoreService {
@@ -12,20 +13,27 @@ export class FirestoreService {
       this.db = admin.firestore();
     }
 
-  async create(collection: string, data: any): Promise<string> {
-    const docRef = await this.db.collection(collection).add(data);
-    return docRef.id;
+  async create(payload:{id:string, collection: string, data: any}): Promise<any> {
+    const {id,collection,data} = payload;
+    const docId = id || v4();
+    const docRef = await this.db.collection(collection).doc(docId).set(data);
+    return docRef;
   }
 
   async findAll(collection: string): Promise<any[]> {
     const snapshot = await this.db.collection(collection).get();
+    console.log({snapshot});
+    
     return snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
     }));
   }
 
-  async findOne(collection: string, id: string): Promise<any> {
+  async findOne(payload:{collection: string, id: string}): Promise<any> {
+    const {collection, id} = payload;
+    console.log({payload});
+    
     const docRef = await this.db.collection(collection).doc(id).get();
     if (!docRef.exists) {
       return null;
@@ -36,11 +44,13 @@ export class FirestoreService {
     };
   }
 
-  async update(collection: string, id: string, data: any): Promise<void> {
+  async update(payload:{collection: string, id: string, data: any}): Promise<void> {
+    const {collection, id, data} = payload;
     await this.db.collection(collection).doc(id).update(data);
   }
 
-  async delete(collection: string, id: string): Promise<void> {
+  async delete(payload:{collection: string, id: string}): Promise<void> {
+    const {collection, id} = payload;
     await this.db.collection(collection).doc(id).delete();
   }
 }
